@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29230.61
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Munq.RedisClient", "Munq.RedisClient\Munq.RedisClient.csproj", "{10D8AACC-8EBD-48A4-865B-C26BD0D0E156}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F36A7176-62AA-4543-AA7B-E41A392F96FC}"
+	ProjectSection(SolutionItems) = preProject
+		Readme.md = Readme.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Munq.RedisClient.Tests", "Munq.RedisClient.Tests\Munq.RedisClient.Tests.csproj", "{ADC87A49-3F54-4E08-B6B7-F44033D29002}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{10D8AACC-8EBD-48A4-865B-C26BD0D0E156}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10D8AACC-8EBD-48A4-865B-C26BD0D0E156}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10D8AACC-8EBD-48A4-865B-C26BD0D0E156}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10D8AACC-8EBD-48A4-865B-C26BD0D0E156}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADC87A49-3F54-4E08-B6B7-F44033D29002}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADC87A49-3F54-4E08-B6B7-F44033D29002}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADC87A49-3F54-4E08-B6B7-F44033D29002}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADC87A49-3F54-4E08-B6B7-F44033D29002}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D1D4F588-92AC-41DE-85CF-2144DCCCF89F}
+	EndGlobalSection
+EndGlobal
