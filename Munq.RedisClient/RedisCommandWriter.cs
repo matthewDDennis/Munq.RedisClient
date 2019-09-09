@@ -34,6 +34,11 @@ namespace Munq.RedisClient
                     {
                         WriteBulkString(byteArray);
                     }
+                    else if (parameter is bool boolValue)
+                    {
+                        _writer.Write(boolValue ? RedisConstants.TrueBulkString
+                                                : RedisConstants.FalseBulkString);
+                    }
                     else
                     {
                         // TODO: Use Utf8Encoder into span extensions to do this without creating string.
