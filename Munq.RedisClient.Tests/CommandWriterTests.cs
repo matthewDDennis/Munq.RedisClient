@@ -172,12 +172,40 @@ namespace Munq.RedisClient.Tests
             await TestOneByteArrayParameterCommand("ByteArryParamsCommand", new byte[] { 1, 1, 2, 3, 5, 8, 13 });
         }
 
+        [TestMethod]
+        public async Task CanWriteCommandMultipleParameters()
+        {
+            await TestParameterCommand("HSet", "Key1", 147);
+        }
+
         private async Task TestOneParameterCommand(string commandName, object value)
         {
             var valueString = value.ToString();
             RedisCommand redisCommand = new RedisCommand(commandName, value);
             byte[] expected = Encoding.UTF8.GetBytes(
                 $"*2\r\n${redisCommand.Name.Length}\r\n{commandName}\r\n${valueString.Length}\r\n{valueString}\r\n");
+
+            await _handler.WriteCommand(redisCommand);
+            PipeReader output = _transport.Transport.Input;
+            ReadResult readResult = await output.ReadAsync();
+            var buffer = readResult.Buffer;
+
+            var span = buffer.Slice(0);
+            CollectionAssert.AreEqual(expected, span.ToArray());
+
+            output.AdvanceTo(buffer.End);
+        }
+
+        private async Task TestParameterCommand(string commandName, params object[] values)
+        {
+            RedisCommand redisCommand = new RedisCommand(commandName, values);
+            var expectedString = $"*{values.Length + 1}\r\n${redisCommand.Name.Length}\r\n{commandName}\r\n";
+            foreach(var value in values)
+            {
+                var valueString = value.ToString();
+                expectedString += $"${valueString.Length}\r\n{valueString}\r\n";
+            }
+            byte[] expected = Encoding.UTF8.GetBytes(expectedString);
 
             await _handler.WriteCommand(redisCommand);
             PipeReader output = _transport.Transport.Input;
