@@ -11,13 +11,8 @@ namespace Munq.RedisClient.Tests
     [TestClass]
     public class CommandWriterTests
     {
-        TestTransport _transport;
-        RedisProtocolHandler _handler;
-        public CommandWriterTests()
-        {
-            _transport = new TestTransport();
-            _handler = new RedisProtocolHandler(_transport.Application);
-        }
+        Pipe _pipe = new Pipe();
+
 
         [TestMethod]
         public async Task CanWriteCommandWithNoParameters()
@@ -27,15 +22,14 @@ namespace Munq.RedisClient.Tests
             byte[] expected = Encoding.UTF8.GetBytes(
                 $"*1\r\n${redisCommand.Name.Length}\r\n{commandName}\r\n");
 
-            await _handler.WriteCommand(redisCommand);
-            PipeReader output = _transport.Transport.Input;
-            ReadResult readResult = await output.ReadAsync();
+            await _pipe.Writer.Write(redisCommand);
+            ReadResult readResult = await _pipe.Reader.ReadAsync();
             var buffer = readResult.Buffer;
 
             var span = buffer.Slice(0);
             CollectionAssert.AreEqual(expected, span.ToArray());
-            
-            output.AdvanceTo(buffer.End);
+
+            _pipe.Reader.AdvanceTo(buffer.End);
         }
 
         [TestMethod]
@@ -46,15 +40,14 @@ namespace Munq.RedisClient.Tests
             byte[] expected = Encoding.UTF8.GetBytes(
                 $"*2\r\n${redisCommand.Name.Length}\r\n{commandName}\r\n$1\r\n1\r\n");
 
-            await _handler.WriteCommand(redisCommand);
-            PipeReader output = _transport.Transport.Input;
-            ReadResult readResult = await output.ReadAsync();
+            await _pipe.Writer.Write(redisCommand);
+            ReadResult readResult = await _pipe.Reader.ReadAsync();
             var buffer = readResult.Buffer;
 
             var span = buffer.Slice(0);
             CollectionAssert.AreEqual(expected, span.ToArray());
 
-            output.AdvanceTo(buffer.End);
+            _pipe.Reader.AdvanceTo(buffer.End);
         }
 
         [TestMethod]
@@ -65,15 +58,14 @@ namespace Munq.RedisClient.Tests
             byte[] expected = Encoding.UTF8.GetBytes(
                 $"*2\r\n${redisCommand.Name.Length}\r\n{commandName}\r\n$1\r\n0\r\n");
 
-            await _handler.WriteCommand(redisCommand);
-            PipeReader output = _transport.Transport.Input;
-            ReadResult readResult = await output.ReadAsync();
+            await _pipe.Writer.Write(redisCommand);
+            ReadResult readResult = await _pipe.Reader.ReadAsync();
             var buffer = readResult.Buffer;
 
             var span = buffer.Slice(0);
             CollectionAssert.AreEqual(expected, span.ToArray());
 
-            output.AdvanceTo(buffer.End);
+            _pipe.Reader.AdvanceTo(buffer.End);
         }
 
         [TestMethod]
@@ -178,65 +170,59 @@ namespace Munq.RedisClient.Tests
             await TestParameterCommand("HSet", "Key1", 147);
         }
 
-        private async Task TestOneParameterCommand(string commandName, object value)
+        private Task TestOneParameterCommand(string commandName, object value)
         {
-            var valueString = value.ToString();
-            RedisCommand redisCommand = new RedisCommand(commandName, value);
-            byte[] expected = Encoding.UTF8.GetBytes(
-                $"*2\r\n${redisCommand.Name.Length}\r\n{commandName}\r\n${valueString.Length}\r\n{valueString}\r\n");
-
-            await _handler.WriteCommand(redisCommand);
-            PipeReader output = _transport.Transport.Input;
-            ReadResult readResult = await output.ReadAsync();
-            var buffer = readResult.Buffer;
-
-            var span = buffer.Slice(0);
-            CollectionAssert.AreEqual(expected, span.ToArray());
-
-            output.AdvanceTo(buffer.End);
+            return TestParameterCommand(commandName, value);
         }
 
         private async Task TestParameterCommand(string commandName, params object[] values)
         {
             RedisCommand redisCommand = new RedisCommand(commandName, values);
             var expectedString = $"*{values.Length + 1}\r\n${redisCommand.Name.Length}\r\n{commandName}\r\n";
+            var expectedBytes = new List<byte>();
+            expectedBytes.AddRange(Encoding.UTF8.GetBytes(expectedString));
+
             foreach(var value in values)
             {
-                var valueString = value.ToString();
-                expectedString += $"${valueString.Length}\r\n{valueString}\r\n";
+                WriteArrayElement(expectedBytes, value);
             }
-            byte[] expected = Encoding.UTF8.GetBytes(expectedString);
 
-            await _handler.WriteCommand(redisCommand);
-            PipeReader output = _transport.Transport.Input;
-            ReadResult readResult = await output.ReadAsync();
+
+            await _pipe.Writer.Write(redisCommand);
+            ReadResult readResult = await _pipe.Reader.ReadAsync();
             var buffer = readResult.Buffer;
 
             var span = buffer.Slice(0);
-            CollectionAssert.AreEqual(expected, span.ToArray());
+            CollectionAssert.AreEqual(expectedBytes.ToArray(), span.ToArray());
 
-            output.AdvanceTo(buffer.End);
+            _pipe.Reader.AdvanceTo(buffer.End);
         }
 
-        private async Task TestOneByteArrayParameterCommand(string commandName, byte[] value)
+        private static void WriteArrayElement(List<byte> expectedBytes, object value)
         {
-            RedisCommand redisCommand = new RedisCommand(commandName, value);
-            byte[] expected1 = Encoding.UTF8.GetBytes(
-                $"*2\r\n${redisCommand.Name.Length}\r\n{commandName}\r\n${value.Length}\r\n");
-            var byteList = new List<byte>(expected1);
-            byteList.AddRange(value);
-            byteList.AddRange(new byte[] { (byte)'\r', (byte)'\n' });
-            byte[] expected = byteList.ToArray();
+            if (value is byte[] byteArray)
+            {
+                var valueString = $"${byteArray.Length}\r\n";
+                expectedBytes.AddRange(Encoding.UTF8.GetBytes($"${byteArray.Length}\r\n"));
+                expectedBytes.AddRange(byteArray);
+                expectedBytes.AddRange(new byte[] { (byte)'\r', (byte)'\n' });
 
-            await _handler.WriteCommand(redisCommand);
-            PipeReader output = _transport.Transport.Input;
-            ReadResult readResult = await output.ReadAsync();
-            var buffer = readResult.Buffer;
+            }
+            else
+            {
+                string valueString;
+                if (value is bool boolValue)
+                    valueString = (boolValue ? 1 : 0).ToString();
+                else
+                    valueString = value.ToString();
+                var expectedString = $"${valueString.Length}\r\n{valueString}\r\n";
+                expectedBytes.AddRange(Encoding.UTF8.GetBytes(expectedString));
+            }
+        }
 
-            var span = buffer.Slice(0);
-            CollectionAssert.AreEqual(expected, span.ToArray());
-
-            output.AdvanceTo(buffer.End);
+        private Task TestOneByteArrayParameterCommand(string commandName, byte[] value)
+        {
+            return TestParameterCommand(commandName, value);
         }
     }
 }

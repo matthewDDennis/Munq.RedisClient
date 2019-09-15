@@ -5,23 +5,16 @@ using System.Collections.Generic;
 using System.IO.Pipelines;
 using System.Text;
 using System.Text.Encodings;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Munq.RedisClient
 {
-    public class RedisCommandWriter
+    public static class RedisCommandPipeWriterExtensions
     {
-        private readonly PipeWriter _writer;
-
-        public RedisCommandWriter(PipeWriter writer)
+        public static ValueTask<FlushResult> Write(this PipeWriter _writer, IRedisCommand command, CancellationToken token = default)
         {
-            _writer = writer;
-        }
-
-        public ValueTask<FlushResult> WriteCommand(IRedisCommand command)
-        {
-            var numElements = (command.Parameters?.Length ?? 0) + 1;
-            WriteArraySize(numElements);
+            WriteArraySize((command.Parameters?.Length ?? 0) + 1);
             WriteBulkString(command.Name);
             if ((command.Parameters?.Length ?? 0) > 0)
                 foreach(var parameter in command.Parameters)
@@ -46,44 +39,43 @@ namespace Munq.RedisClient
                     }
                 }
 
-            return _writer.FlushAsync();
-        }
+            return _writer.FlushAsync(token);
 
-        private void WriteArraySize(int numElements)
-        {
-            _writer.Write(RedisConstants.ArrayStart);
-            WriteInt(numElements);
-            WriteCrLf();
-        }
-
-        private void WriteCrLf()
-        {
-            _writer.Write(RedisConstants.CrLf);
-        }
-
-        private void WriteBulkString(byte[] bytes)
-        {
-            if (bytes == null)
+            void WriteArraySize(int numElements)
             {
-                _writer.Write(RedisConstants.NullBulkString);
-                return;
+                _writer.Write(RedisConstants.ArrayStart);
+                WriteInt(numElements);
+                WriteCrLf();
             }
 
-            _writer.Write(RedisConstants.BulkStringStart);
-            WriteInt(bytes.Length);
-            WriteCrLf();
-            _writer.Write(bytes);
-            WriteCrLf();
+            void WriteBulkString(byte[] bytes)
+            {
+                if (bytes == null)
+                {
+                    _writer.Write(RedisConstants.NullBulkString);
+                    return;
+                }
+
+                _writer.Write(RedisConstants.BulkStringStart);
+                WriteInt(bytes.Length);
+                WriteCrLf();
+                _writer.Write(bytes);
+                WriteCrLf();
+            }
+
+            void WriteInt(int number)
+            {
+                var span = _writer.GetSpan();
+                int nWritten;
+
+                Utf8Formatter.TryFormat(number, span, out nWritten);
+                _writer.Advance(nWritten);
+            }
+
+            void WriteCrLf()
+            {
+                _writer.Write(RedisConstants.CrLf);
+            }
         }
-
-        private void WriteInt(int number)
-        {
-            var span = _writer.GetSpan();
-            int nWritten;
-
-            Utf8Formatter.TryFormat(number, span, out nWritten);
-            _writer.Advance(nWritten);
-        }
-
     }
 }

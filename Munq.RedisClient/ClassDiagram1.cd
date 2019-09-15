@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Munq.RedisClient.RedisCommand" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="1.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAIAAAAAAAAA=</HashCode>
+      <FileName>RedisCommand.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Munq.RedisClient.RedisCommandWriter">
+    <Position X="4.75" Y="3.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAACAAAAAAAAAAAAAEAAhAAAAAAAAAAAAAAIA=</HashCode>
+      <FileName>RedisCommandWriter.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Munq.RedisClient.RedisConstants" Collapsed="true">
+    <Position X="4.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>oAAAAAAAAAAAAAQAAAAIAAAACAAIAACAAAABAAAAAgA=</HashCode>
+      <FileName>RedisConstants.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Munq.RedisClient.RedisProtocolHandler">
+    <Position X="1.25" Y="2.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABCAICAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RedisProtocolHandler.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="_commandWriter" />
+      <Field Name="_responseReader" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Munq.RedisClient.RedisResponseReader">
+    <Position X="4.75" Y="1.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RedisResponseReader.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="Munq.RedisClient.IRedisCommand" Collapsed="true">
+    <Position X="3" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAIAAAAAAAAA=</HashCode>
+      <FileName>IRedisCommand.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Munq.RedisClient.IRedisResponse" Collapsed="true">
+    <Position X="6.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IRedisResponse.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

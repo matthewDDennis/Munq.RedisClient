@@ -34,9 +34,9 @@ The goals of this implementation are
 - Complete Unit Testing
 
 ## Redis Protocol
-Clients communicate with the Redis Server using the REdis Serialization Protocol(RESP) as detailed in [The Redis Protocol Specification](https://redis.io/topics/protocol). As the specification states:
+Clients communicate with the Redis Server using the Redis Serialization Protocol(RESP) as detailed in [The Redis Protocol Specification](https://redis.io/topics/protocol). As the specification states:
 
->Redis clients communicate with the Redis server using a protocol called **RESP**. (REdis Serialization Protocol). While the protocol was designed specifically for Redis, it can be used for other client-server software projects.
+>Redis clients communicate with the Redis server using a protocol called **RESP**. (Redis Serialization Protocol). While the protocol was designed specifically for Redis, it can be used for other client-server software projects.
 > 
 >RESP is a compromise between the following things:
 > - Simple to implement.
@@ -54,13 +54,13 @@ The magic of the Pipelines based Socket Transport is a which exposes the PipeRea
 
 The Connection exposes a IDuplexPipe, Application, which has an Input PipeReader and an Output PipeWriter.  The Input is set to the InputPipe.Reader while the Output is set to the OutputPipe.Writer.  The connection has two tasks, one that reads data from the Socket and writes it to the InputPipe, and a second task the reads data from the OutputPipe and writes it to the Socket.
 
-The Pipes use a collection of memory blocks to supply and reuses buffers for storing data.  This is not like the Streams paradigm where the user is responsible for allocating and managing data buffers used to read and write to the Stream.  The result is the Pipeline transport requires little or no buffer allocation and Garbage Collection to read and write from the Socket.  In fact, in most cases there is little need to copy data from one buffer to another until such copying is require to deserialize some object from the received data.
+The Pipes use a collection of memory blocks to supply and reuse buffers for storing data.  This is not like the Streams paradigm where the user is responsible for allocating and managing data buffers used to read and write to the Stream.  The result is the Pipeline transport requires little or no buffer allocation and Garbage Collection to read and write from the Socket.  In fact, in most cases there is little need to copy data from one buffer to another until such copying is required to deserialize some object from the received data.
 
 INSERT A DIAGRAM OF TRANSPORT PIPES HERE
 
 This means that our Redis Protocol handler needs to do two things:
 * serialize Redis Commands to bytes that are written to a PipeWriter
-* read bytes from a PipeWriter and deserialize them into Redis Responses
+* read bytes from a PipeWReader and deserialize them into Redis Responses
 
 Because of this, it is simple to create Test Transport Layer from two Pipes.  The code under test connects to the Application side, and the test reads and writes to Transport side, allowing the expected functionality to be tested without actually needing to setup a Redis instance for Unit Testing.
 

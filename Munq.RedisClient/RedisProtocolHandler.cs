@@ -11,8 +11,7 @@ namespace Munq.RedisClient
 {
     public class RedisProtocolHandler
     {
-        private readonly RedisCommandWriter _commandWriter;
-
+        private readonly RedisResponseReader _responseReader;
         /// <summary>
         /// Gets the Transport Connection's Application side PipeReader and PipeWriter pair
         /// to which the protocol handler is connected.
@@ -26,7 +25,7 @@ namespace Munq.RedisClient
         public RedisProtocolHandler(IDuplexPipe transport)
         {
             Transport = transport;
-            _commandWriter = new RedisCommandWriter(transport.Output);
+            _responseReader = new RedisResponseReader(transport.Input);
         }
 
         /// <summary>
@@ -36,12 +35,12 @@ namespace Munq.RedisClient
         /// <returns></returns>
         public ValueTask<FlushResult> WriteCommand(IRedisCommand redisCommand, CancellationToken token = default)
         {
-            return _commandWriter.WriteCommand(redisCommand);
+            return Transport.Output.Write(redisCommand, token);
         }
 
         public ValueTask<IRedisResponse> ReadResponse(CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            return _responseReader.ReadResponse(token);
         }
     }
 }
