@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Munq.RedisClient
+namespace Munq.Redis.Protocol
 {
     public static class RedisConstants
     {
