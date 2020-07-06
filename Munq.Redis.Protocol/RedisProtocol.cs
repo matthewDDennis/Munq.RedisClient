@@ -11,14 +11,14 @@ namespace Munq.Redis.Protocol
 {
     public class RedisProtocol
     {
-        private readonly ProtocolWriter _writer;
-        private readonly ProtocolReader _reader;
+        private readonly ProtocolWriter     _writer;
+        private readonly ProtocolReader     _reader;
         private readonly RedisCommandWriter _commandWriter;
 
         public RedisProtocol(ConnectionContext connection)
         {
-            _writer = connection.CreateWriter();
-            _reader = connection.CreateReader();
+            _writer        = connection.CreateWriter();
+            _reader        = connection.CreateReader();
             _commandWriter = new RedisCommandWriter();
         }
 
