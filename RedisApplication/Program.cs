@@ -44,12 +44,23 @@ namespace RedisApplication
             //Console.WriteLine("Connected to Redis, type into the console");
             //var reads  = Console.OpenStandardInput().CopyToAsync(connection.Transport.Output);
             var writes = connection.Transport.Input.CopyToAsync(Console.OpenStandardOutput());
+
             await redis.SendAsync(new AuthCommand("password"));
             await redis.SendAsync(new AuthCommand("Matthew", "password"));
+
+            await redis.SendAsync(new ClientGetNameCommand());
+            await redis.SendAsync(new ClientIdCommand());
+            await redis.SendAsync(new ClientListCommand());
+
+            await redis.SendAsync(new EchoCommand("Hello o o o!"));
+            await redis.SendAsync(new SelectCommand(1));
+            await redis.SendAsync(new ClientSetNameCommand("MyClient"));
+            await redis.SendAsync(new ClientListCommand());
 
             await redis.SendAsync(new PingCommand());
             await redis.SendAsync(new PingCommand("Hello World!"));
 
+            await redis.SendAsync(new QuitCommand());
             //await reads;
             await writes;
 

@@ -18,33 +18,33 @@ namespace Munq.Redis.Protocol.Commands
     }
 
     // https://redis.io/commands/client-caching
-    public class ClientCaching : RedisCommand
+    public class ClientCachingCommand : RedisCommand
     {
-        public ClientCaching(bool enable)
+        public ClientCachingCommand(bool enable)
             : base(ConnectionCommandNames.Client, ConnectionCommandNames.Client, enable ? "YES" : "NO")
         {}
     }
 
     // https://redis.io/commands/client-getname
-    public class ClientGetName : RedisCommand
+    public class ClientGetNameCommand : RedisCommand
     {
-        public ClientGetName()
+        public ClientGetNameCommand()
             : base(ConnectionCommandNames.Client, ConnectionCommandNames.GetName)
         {}
     }
 
     // https://redis.io/commands/client-getredir
-    public class ClientGetRedir : RedisCommand
+    public class ClientGetRedirCommand : RedisCommand
     {
-        public ClientGetRedir()
+        public ClientGetRedirCommand()
             : base(ConnectionCommandNames.Client, ConnectionCommandNames.GetRedir)
         { }
     }
 
     // https://redis.io/commands/client-id
-    public class ClientId : RedisCommand
+    public class ClientIdCommand : RedisCommand
     {
-        public ClientId()
+        public ClientIdCommand()
             : base(ConnectionCommandNames.Client, ConnectionCommandNames.ID)
         { }
     }
@@ -60,7 +60,7 @@ namespace Munq.Redis.Protocol.Commands
     }
 
     // https://redis.io/commands/client-kill
-    public class ClientKill : RedisCommand
+    public class ClientKillCommand : RedisCommand
     {
         private static readonly byte[] AddrFilterName       = Encoding.UTF8.GetBytes("ADDR");
         private static readonly byte[] IdFilterName         = Encoding.UTF8.GetBytes("ID");
@@ -68,7 +68,7 @@ namespace Munq.Redis.Protocol.Commands
         private static readonly byte[] UsernameFilterName   = Encoding.UTF8.GetBytes("USER");
         private static readonly byte[] SkipMeFilterName     = Encoding.UTF8.GetBytes("SKIPME");
 
-        public ClientKill(string addr = null, string id = null, 
+        public ClientKillCommand(string addr = null, string id = null, 
                           ClientType clientType = ClientType.NoFilter,
                           string username = null, bool? skipMe = null)
             : base(ConnectionCommandNames.Client, ConnectionCommandNames.Kill)
@@ -108,17 +108,17 @@ namespace Munq.Redis.Protocol.Commands
     }
 
     // https://redis.io/commands/client-list
-    public class ClientList : RedisCommand
+    public class ClientListCommand : RedisCommand
     {
-        public ClientList() 
+        public ClientListCommand() 
             : base(ConnectionCommandNames.Client, ConnectionCommandNames.List)
         {}
     }
 
     // https://redis.io/commands/client-pause
-    public class ClientPause : RedisCommand
+    public class ClientPauseCommand : RedisCommand
     {
-        public ClientPause(ulong timeout) 
+        public ClientPauseCommand(ulong timeout) 
             : base(ConnectionCommandNames.Client, ConnectionCommandNames.Pause)
         {
             AddArgument(timeout.ToString());
@@ -133,9 +133,9 @@ namespace Munq.Redis.Protocol.Commands
     }
 
     // https://redis.io/commands/client-reply
-    public class ClientReply : RedisCommand
+    public class ClientReplyCommand : RedisCommand
     {
-        public ClientReply(ClientReplyMode replyMode) 
+        public ClientReplyCommand(ClientReplyMode replyMode) 
             : base(ConnectionCommandNames.Client, ConnectionCommandNames.Reply)
         {
             AddArgument(replyMode.ToString());
@@ -143,9 +143,9 @@ namespace Munq.Redis.Protocol.Commands
     }
 
     // https://redis.io/commands/client-setname
-    public class ClientSetName : RedisCommand
+    public class ClientSetNameCommand : RedisCommand
     {
-        public ClientSetName(string connectionName) 
+        public ClientSetNameCommand(string connectionName) 
             : base(ConnectionCommandNames.Client, ConnectionCommandNames.SetName)
         {
             AddArgument(connectionName);
@@ -153,9 +153,9 @@ namespace Munq.Redis.Protocol.Commands
     }
 
     // https://redis.io/commands/client-tracking
-    public class ClientTracking : RedisCommand
+    public class ClientTrackingCommand : RedisCommand
     {
-        public ClientTracking(bool enable, string redirectClientId = null,
+        public ClientTrackingCommand(bool enable, string redirectClientId = null,
                            IEnumerable<string> prefixes = null,
                            bool bcast = false, bool optIn = false,
                            bool optOut = false, bool noLoop = false)
@@ -193,9 +193,9 @@ namespace Munq.Redis.Protocol.Commands
     }
 
     // https://redis.io/commands/client-unblock
-    public class ClientUnblock : RedisCommand
+    public class ClientUnblockCommand : RedisCommand
     {
-        public ClientUnblock(string clientId, bool unblockAsError)
+        public ClientUnblockCommand(string clientId, bool unblockAsError)
             : base(ConnectionCommandNames.Client, ConnectionCommandNames.Unblock)
         {
             if (unblockAsError)
@@ -255,9 +255,9 @@ namespace Munq.Redis.Protocol.Commands
     }
 
     // https://redis.io/commands/select
-    public class Select : RedisCommand
+    public class SelectCommand : RedisCommand
     {
-        public Select(int databaseNum) : base(ConnectionCommandNames.Select)
+        public SelectCommand(int databaseNum) : base(ConnectionCommandNames.Select)
         {
             AddArgument(databaseNum.ToString());
         }
