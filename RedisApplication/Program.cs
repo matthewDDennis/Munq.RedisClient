@@ -45,6 +45,7 @@ namespace RedisApplication
             //var reads  = Console.OpenStandardInput().CopyToAsync(connection.Transport.Output);
             var writes = connection.Transport.Input.CopyToAsync(Console.OpenStandardOutput());
 
+            Console.WriteLine("----------- Connection Commands ---------------");
             await redis.SendAsync(new AuthCommand("password"));
             await redis.SendAsync(new AuthCommand("Matthew", "password"));
 
@@ -60,8 +61,12 @@ namespace RedisApplication
             await redis.SendAsync(new PingCommand());
             await redis.SendAsync(new PingCommand("Hello World!"));
 
-            await redis.SendAsync(new QuitCommand());
+
+            Console.WriteLine("----------- Key Commands ---------------");
+            await redis.SendAsync(new KeysCommand("*"));
+
             //await reads;
+            await redis.SendAsync(new QuitCommand());
             await writes;
 
 

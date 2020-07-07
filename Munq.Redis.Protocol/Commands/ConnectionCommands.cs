@@ -10,11 +10,26 @@ namespace Munq.Redis.Protocol.Commands
     public class AuthCommand : RedisCommand
     {
         public AuthCommand(string password) : base(ConnectionCommandNames.Auth, password)
-        {}
+        {
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new ArgumentException($"{nameof(password)} is null or empty.", nameof(password));
+            }
+        }
 
         public AuthCommand(string username, string password) 
             : base(ConnectionCommandNames.Auth, username, password)
-        {}
+        {
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new ArgumentException($"{nameof(password)} is null or empty.", nameof(password));
+            }
+
+            if (string.IsNullOrEmpty(username))
+            {
+                throw new ArgumentException($"{nameof(username)} is null or empty.", nameof(username));
+            }
+        }
     }
 
     // https://redis.io/commands/client-caching
@@ -73,6 +88,12 @@ namespace Munq.Redis.Protocol.Commands
                           string username = null, bool? skipMe = null)
             : base(ConnectionCommandNames.Client, ConnectionCommandNames.Kill)
         {
+            if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(username)
+                && string.IsNullOrWhiteSpace(addr) && username == null)
+            {
+                throw new ArgumentException("At least one of the addr, id, clientType or username parameters must be non-default.");
+            }
+
             if (!string.IsNullOrWhiteSpace(id))
             {
                 AddArgument(IdFilterName);
@@ -104,6 +125,12 @@ namespace Munq.Redis.Protocol.Commands
 
                 AddArgument(addr);
             }
+
+            if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(username)
+                && string.IsNullOrWhiteSpace(addr) && username == null)
+            {
+                throw new ArgumentException("At least one of the parameters must be non-null.");
+            }
         }
     }
 
@@ -118,10 +145,10 @@ namespace Munq.Redis.Protocol.Commands
     // https://redis.io/commands/client-pause
     public class ClientPauseCommand : RedisCommand
     {
-        public ClientPauseCommand(ulong timeout) 
+        public ClientPauseCommand(long timeout) 
             : base(ConnectionCommandNames.Client, ConnectionCommandNames.Pause)
         {
-            AddArgument(timeout.ToString());
+            AddArgument(timeout);
         }
     }
 
@@ -148,6 +175,11 @@ namespace Munq.Redis.Protocol.Commands
         public ClientSetNameCommand(string connectionName) 
             : base(ConnectionCommandNames.Client, ConnectionCommandNames.SetName)
         {
+            if (connectionName == null)
+            {
+                throw new ArgumentNullException(nameof(connectionName), $"{nameof(connectionName)} is null.");
+            }
+
             AddArgument(connectionName);
         }
     }
@@ -208,6 +240,11 @@ namespace Munq.Redis.Protocol.Commands
     {
         public EchoCommand(string message) : base(ConnectionCommandNames.Echo)
         {
+            if (string.IsNullOrEmpty(message))
+            {
+                throw new ArgumentException($"{nameof(message)} is null or empty.", nameof(message));
+            }
+
             AddArgument(message);
         }
     }
@@ -218,7 +255,7 @@ namespace Munq.Redis.Protocol.Commands
         public HelloCommand(int protoVer, string username = null, string password = null, 
                             string clientName = null) : base(ConnectionCommandNames.Hello)
         {
-            AddArgument(protoVer.ToString());
+            AddArgument(protoVer);
             if (username != null ^ password == null)
                 throw new ArgumentException("username and password must both contain values or both be null");
 
@@ -243,8 +280,15 @@ namespace Munq.Redis.Protocol.Commands
         public PingCommand() : base(ConnectionCommandNames.Ping)
         {}
 
-        public PingCommand(string echoString) : base(ConnectionCommandNames.Ping, echoString)
-        {}
+        public PingCommand(string echoString) : base(ConnectionCommandNames.Ping)
+        {
+            if (string.IsNullOrEmpty(echoString))
+            {
+                throw new ArgumentException($"{nameof(echoString)} is null or empty.", nameof(echoString));
+            }
+
+            AddArgument(echoString);
+        }
     }
 
     // https://redis.io/commands/ping
@@ -259,7 +303,7 @@ namespace Munq.Redis.Protocol.Commands
     {
         public SelectCommand(int databaseNum) : base(ConnectionCommandNames.Select)
         {
-            AddArgument(databaseNum.ToString());
+            AddArgument(databaseNum);
         }
     }
 }

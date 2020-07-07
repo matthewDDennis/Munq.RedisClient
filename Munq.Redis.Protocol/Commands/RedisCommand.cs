@@ -24,17 +24,15 @@ namespace Munq.Redis.Protocol.Commands
 
         public RedisCommand(byte[] commandName, params string[] args)
         {
-            CommandName       = commandName;
-            for (int i = 0; i < args.Length; i++)
-                Parameters.Add(Encoding.UTF8.GetBytes(args[i]));
+            CommandName = commandName;
+            AddArguments(args);
         }
 
         public RedisCommand(byte[] commandName, byte[] subcommandName, params string[] args)
         {
-            CommandName       = commandName;
-            SubCommandName    = subcommandName;
-            for (int i = 0; i < args.Length; i++)
-                Parameters.Add(Encoding.UTF8.GetBytes(args[i]));
+            CommandName    = commandName;
+            SubCommandName = subcommandName;
+            AddArguments(args);
         }
 
         public void Write(IBufferWriter<byte> output)
@@ -54,13 +52,33 @@ namespace Munq.Redis.Protocol.Commands
             Parameters.Add(arg);
         }
 
-        private bool WriteCommandStart( IBufferWriter<byte> output)
+        public void AddArgument(int number)
         {
-            Span<byte> buffer = stackalloc byte[12];
+            Parameters.Add(NumberToBytes(number));
+        }
+
+        public void AddArgument(long number)
+        {
+            Parameters.Add(NumberToBytes(number));
+        }
+
+        public void AddArguments(IEnumerable<string> args)
+        {
+            foreach (var arg in args)
+                AddArgument(arg);
+        }
+
+        public void AddArguments(IEnumerable<byte[]> args)
+        {
+            Parameters.AddRange(args);
+        }
+
+        private bool WriteCommandStart(IBufferWriter<byte> output)
+        {
             output.Write(RedisConstants.ArrayStart);
-            if (!Utf8Formatter.TryFormat(Parameters.Count + (SubCommandName == null ? 1 : 2), buffer, out int bytesWritten))
+            int numParameters = Parameters.Count + (SubCommandName == null ? 1 : 2);
+            if (!WriteNumber(numParameters, output))
                 return false;
-            output.Write(buffer.Slice(0, bytesWritten));
             output.Write(RedisConstants.CrLf);
 
             if (!WriteBulkString(CommandName, output))
@@ -74,11 +92,9 @@ namespace Munq.Redis.Protocol.Commands
 
         private static bool WriteBulkString(byte[] input, IBufferWriter<byte> output)
         {
-            Span<byte> buffer = stackalloc byte[12];
             output.Write(RedisConstants.BulkStringStart);
-            if (!Utf8Formatter.TryFormat(input.Length, buffer, out int bytesWritten))
+            if (!WriteNumber(input.Length, output))
                 return false;
-            output.Write(buffer.Slice(0, bytesWritten));
             output.Write(RedisConstants.CrLf);
 
             output.Write(input);
@@ -86,5 +102,44 @@ namespace Munq.Redis.Protocol.Commands
 
             return true;
         }
+
+        private static bool WriteNumber(int number, IBufferWriter<byte> output)
+        {
+            Span<byte> buffer = stackalloc byte[12];
+            if (!Utf8Formatter.TryFormat(number, buffer, out int bytesWritten))
+                return false;
+            output.Write(buffer.Slice(0, bytesWritten));
+            return true;
+        }
+
+        private static bool WriteNumber(long number, IBufferWriter<byte> output)
+        {
+            Span<byte> buffer = stackalloc byte[20];
+            if (!Utf8Formatter.TryFormat(number, buffer, out int bytesWritten))
+                return false;
+            output.Write(buffer.Slice(0, bytesWritten));
+            return true;
+        }
+
+        private static byte[] NumberToBytes(long number)
+        {
+            Span<byte> buffer = stackalloc byte[20];
+
+            if (!Utf8Formatter.TryFormat(number, buffer, out int bytesWritten))
+                return Array.Empty<byte>();
+
+            return buffer.Slice(0, bytesWritten).ToArray();
+        }
+
+        private static byte[] NumberToBytes(int number)
+        {
+            Span<byte> buffer = stackalloc byte[12];
+
+            if (!Utf8Formatter.TryFormat(number, buffer, out int bytesWritten))
+                return Array.Empty<byte>();
+
+            return buffer.Slice(0, bytesWritten).ToArray();
+        }
+
     }
 }
