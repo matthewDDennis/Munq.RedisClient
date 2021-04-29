@@ -1,5 +1,7 @@
 # Creating a Redis Client using the .NET System.IO.Pipelines and Kestrel Sockets Libraries
 
+### A minor change to test the GitHub Webhook to CodeProject.
+
 This article is the first in a series about creating an Asynchronous client for the Redis server that is low allocation, and hence GC pressure, with minimal data copying.  This is done using the techniques used to make Kestrel one of the top ten web servers in terms of raw requests per second as recorded in [Round 13 of the TechEmpower Plain Text](https://www.techempower.com/benchmarks/#section=data-r13&hw=ph&test=plaintext) performance tests.
 
 ## Background
